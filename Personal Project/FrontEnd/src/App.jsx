@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getWorkshopTheme } from "./util/getWorkshopTheme.js";
+import { getWorkshopTheme } from "./utils/getWorkshopTheme.js";
 import "./App.css";
 
 const hilts = [
