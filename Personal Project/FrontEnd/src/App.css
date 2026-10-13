@@ -3,10 +3,7 @@
     padding: clamp(20px, 5vw, 64px);
     color: #f4ead7;
     background-color: var(--workshop-background);
-    background-image: repeating-linear-gradient(
-            3deg,
-            transparent 0 5px,
-            #00000012 5px 7px
+    background-image: var(--workshop-texture, none);
     );
     transition: background-color 600ms ease;
 }
@@ -94,4 +91,16 @@
     .crystal {
         transition: none;
     }
+}
+
+.workshop > header {
+    padding: 24px;
+    border-radius: 12px;
+    background: #151813e6;
+}
+
+.component-drawer legend {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: #151813;
 }
