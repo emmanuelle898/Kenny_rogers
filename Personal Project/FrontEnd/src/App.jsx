@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCrystals } from "./api/getCrystals.js";
+import { getParts } from "./api/getParts.js";
 import { getWorkshopTheme } from "./utils/getWorkshopTheme.js";
 import "./App.css";
+import PartSelector from "./components/PartSelector.jsx";
 
-const hilts = [
-    { id: "alloy", name: "Ribbed alloy", backgroundColor: "#273c2b",backgroundImage: `
+const hiltStyles = [
+    { id: "alloy",backgroundImage: `
     linear-gradient(
       115deg,
       #00000066 0%,
@@ -27,7 +30,7 @@ const hilts = [
   `,
     },
 
-    { id: "brass", name: "Salvaged brass", backgroundColor: "#C49E5B", backgroundImage: `
+    { id: "brass", backgroundImage: `
     radial-gradient(
       ellipse at 12% 25%,
       #304c3ed9 0%,
@@ -66,7 +69,7 @@ const hilts = [
   `,
     },
 
-    {id: "steel", name: "Machined steel", backgroundColor: "#B5C0C9", backgroundImage: `
+    {id: "steel", backgroundImage: `
     repeating-linear-gradient(
       0deg,
       #ffffff12 0px,
@@ -88,7 +91,7 @@ const hilts = [
   `,
     },
 
-    { id: "wood", name: "Wookie wood", backgroundColor: "#6c4223", backgroundImage: `
+    { id: "wood",  backgroundImage: `
     repeating-linear-gradient(
       92deg,
       transparent 0px,
@@ -119,7 +122,7 @@ const hilts = [
   `,
     },
 
-    { id: "gold", name: "Golden plated", backgroundColor: "#ffc30b", backgroundImage: `
+    { id: "gold", backgroundImage: `
     repeating-linear-gradient(
       0deg,
       #fff5bd0d 0px 1px,
@@ -142,21 +145,98 @@ const hilts = [
      }
 ];
 
-const crystals = [
-    { id: "violet", name: "Violet crystal", glowColor: "#ba00ff" },
-    { id: "blue", name: "Blue crystal", glowColor: "#0018f9" },
-    { id: "yellow", name: "Yellow crystal", glowColor: "#FFE81F" },
-    { id: "crimson", name: "Crimson crystal", glowColor: "#990000" },
-    { id: "orange", name: "Orange crystal", glowColor: "#be5103" },
-    { id: "green", name: "Green crystal", glowColor: "#33ff33" },
-    { id: "white", name: "White crystal", glowColor: "#f4f8ff" },
-    { id: "black", name: "Black crystal", glowColor: "#000000" },
 
-];
 
 export default function App() {
-    const [selectedHilt, setSelectedHilt] = useState(hilts[0]);
-    const [selectedCrystal, setSelectedCrystal] = useState(crystals[0]);
+
+    const [hilts, setHilts] = useState([]);
+    const [selectedHilt, setSelectedHilt] = useState(null);
+    const [crystals, setCrystals] = useState([]);
+    const [selectedCrystal, setSelectedCrystal] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+
+        async function loadCatalog() {
+            try {
+                const [loadedParts, loadedCrystals] = await Promise.all([
+                    getParts(),
+                    getCrystals(),
+                ]);
+
+                const styledHilts = loadedParts.map((part) => {
+                    const matchingStyle = hiltStyles.find(
+                        (style) => style.id === part.id
+                    );
+
+                    return {
+                        ...part,
+                        backgroundImage: matchingStyle?.backgroundImage ?? "none",
+                    };
+                });
+
+                if (active) {
+                    setHilts(styledHilts);
+                    setSelectedHilt(styledHilts[0] ?? null);
+
+                    setCrystals(loadedCrystals);
+                    setSelectedCrystal(loadedCrystals[0] ?? null);
+                }
+            } catch (error) {
+                console.error("Workshop catalog loading failed:", error);
+
+                if (active) {
+                    setError(
+                        `Could not load workshop parts: ${error.message}`
+                    );
+                }
+            }finally {
+                if (active) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadCatalog();
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    if (loading) {
+        return (
+            <main className="workshop">
+                <p role="status">Loading workshop parts...</p>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="workshop">
+                <p role="alert">{error}</p>
+            </main>
+        );
+    }
+
+    if (!selectedHilt) {
+        return (
+            <main className="workshop">
+                <p>No hilts are available yet.</p>
+            </main>
+        );
+    }
+
+    if (!selectedCrystal) {
+        return (
+            <main className="workshop">
+                <p>No crystals are available yet.</p>
+            </main>
+        );
+    }
 
     const theme = getWorkshopTheme({
         hilt: selectedHilt,
@@ -188,39 +268,20 @@ export default function App() {
                 <div className="crystal" aria-hidden="true" />
             </section>
 
-            <fieldset className="component-drawer">
-                <legend>Choose your hilt</legend>
+            <PartSelector
+                title="Choose your hilt"
+                parts={hilts}
+                selectedPart={selectedHilt}
+                onSelect={setSelectedHilt}
+            />
 
-                <div className="part-options">
-                    {hilts.map((hilt) => (
-                        <button
-                            key={hilt.id}
-                            type="button"
-                            aria-pressed={selectedHilt.id === hilt.id}
-                            onClick={() => setSelectedHilt(hilt)}
-                        >
-                            {hilt.name}
-                        </button>
-                    ))}
-                </div>
-            </fieldset>
+            <PartSelector
+                title="Choose your crystal"
+                parts={crystals}
+                selectedPart={selectedCrystal}
+                onSelect={setSelectedCrystal}
+            />
 
-            <fieldset className="component-drawer">
-                <legend>Choose your crystal</legend>
-
-                <div className="part-options">
-                    {crystals.map((crystal) => (
-                        <button
-                            key={crystal.id}
-                            type="button"
-                            aria-pressed={selectedCrystal.id === crystal.id}
-                            onClick={() => setSelectedCrystal(crystal)}
-                        >
-                            {crystal.name}
-                        </button>
-                    ))}
-                </div>
-            </fieldset>
         </main>
     );
 }
