@@ -1,247 +1,319 @@
 import { useEffect, useState } from "react";
-import { getCrystals } from "./api/getCrystals.js";
+
 import { getParts } from "./api/getParts.js";
-import { getWorkshopTheme } from "./utils/getWorkshopTheme.js";
-import "./App.css";
+import { getCrystals } from "./api/getCrystals.js";
+import { getEmitters } from "./api/getEmitters.js";
+import { getAccessories } from "./api/getAccessories.js";
+
+import {
+    createBuild,
+    listBuilds,
+    getBuild,
+    updateBuild,
+    deleteBuild,
+} from "./api/builds.js";
+
 import PartSelector from "./components/PartSelector.jsx";
+import SaberPreview from "./components/SaberPreview.jsx";
+import BuildSummary from "./components/BuildSummary.jsx";
+import BuildForm from "./components/BuildForm.jsx";
+import SavedBuildList from "./components/SavedBuildList.jsx";
 
-const hiltStyles = [
-    { id: "alloy",backgroundImage: `
-    linear-gradient(
-      115deg,
-      #00000066 0%,
-      transparent 30%,
-      #e1f2d51f 44%,
-      transparent 58%,
-      #00000055 100%
-    ),
-    repeating-linear-gradient(
-      45deg,
-      #142019 0px,
-      #142019 3px,
-      #455b48 4px,
-      #8b9f86 6px,
-      #61785d 9px,
-      #354c38 17px,
-      #25392a 22px,
-      #101a13 25px,
-      #101a13 13px
-    )
-  `,
-    },
+import { getWorkshopTheme } from "./utils/getWorkshopTheme.js";
+import { getWorkshopAppearance } from "./utils/getWorkshopAppearance.js";
+import { hiltStyles } from "./styles/hiltStyles.js";
+import "./App.css";
+import "./styles/workshopSurfaces.css";
 
-    { id: "brass", backgroundImage: `
-    radial-gradient(
-      ellipse at 12% 25%,
-      #304c3ed9 0%,
-      #43544188 9%,
-      transparent 26%
-    ),
-    radial-gradient(
-      ellipse at 85% 72%,
-      #324e42cc 0%,
-      #35433677 12%,
-      transparent 30%
-    ),
-    radial-gradient(
-      ellipse at 62% 18%,
-      #643218bb 0%,
-      #47291a66 10%,
-      transparent 25%
-    ),
-    repeating-linear-gradient(
-      3deg,
-      #21130933 0px 1px,
-      transparent 1px 5px,
-      #f3db9e15 5px 6px,
-      transparent 6px 11px
-    ),
-    linear-gradient(
-      115deg,
-      #382716 0%,
-      #80602e 18%,
-      #c4a363 34%,
-      #99753b 44%,
-      #4e371d 60%,
-      #b89652 79%,
-      #634721 100%
-    )
-  `,
-    },
+const categories = ["hilt", "crystal", "emitter", "collar", "switch", "pommel"];
 
-    {id: "steel", backgroundImage: `
-    repeating-linear-gradient(
-      0deg,
-      #ffffff12 0px,
-      #ffffff12 1px,
-      #00000012 1px,
-      #00000012 2px,
-      transparent 2px,
-      transparent 4px),
-    linear-gradient(
-      115deg,
-      #28323b 0%,
-      #7e8c98 20%,
-      #e6edf2 35%,
-      #85939f 48%,
-      #35434f 62%,
-      #c1cbd3 80%,
-      #53616c 100%
-    )
-  `,
-    },
+const drawerTitles = {
+    hilt: "Choose your hilt",
+    crystal: "Choose your crystal",
+    emitter: "Choose your emitter",
+    collar: "Choose your ring",
+    switch: "Choose your switch",
+    pommel: "Choose your pommel",
+};
 
-    { id: "wood",  backgroundImage: `
-    repeating-linear-gradient(
-      92deg,
-      transparent 0px,
-      transparent 7px,
-      #1c0e0866 8px,
-      transparent 10px,
-      #c08a4826 14px,
-      transparent 18px,
-      transparent 29px
-    ),
-    repeating-linear-gradient(
-      88deg,
-      transparent 0px,
-      transparent 19px,
-      #180c0755 21px,
-      transparent 24px,
-      transparent 47px
-    ),
-    linear-gradient(
-      105deg,
-      #25150e 0%,
-      #57351f 25%,
-      #805132 45%,
-      #422719 65%,
-      #6c4223 82%,
-      #2b190f 100%
-    )
-  `,
-    },
+function defaultSelections(catalog) {
+    return Object.fromEntries(
+        categories.map((category) => [category, catalog[category][0]])
+    );
+}
 
-    { id: "gold", backgroundImage: `
-    repeating-linear-gradient(
-      0deg,
-      #fff5bd0d 0px 1px,
-      transparent 1px 4px
-    ),
-    linear-gradient(
-      115deg,
-      #493008 0%,
-      #a87315 15%,
-      #e8bb49 28%,
-      #fff1ad 35%,
-      #c99524 42%,
-      #77500e 55%,
-      #d9a62e 70%,
-      #ffe99b 82%,
-      #9c6913 94%,
-      #533508 100%
-    )
-  `,
-     }
-];
+function restoreSelections(build, catalog) {
+    return Object.fromEntries(
+        categories.map((category) => {
+            const savedPart = build.parts.find(
+                (part) => part.categoryId === category
+            );
 
+            const availablePart = catalog[category].find(
+                (part) => part.id === savedPart?.id
+            );
 
+            if (!availablePart) {
+                throw new Error(
+                    `The saved ${category} is not available in the catalog.`
+                );
+            }
+
+            return [category, availablePart];
+        })
+    );
+}
 
 export default function App() {
+    const [catalog, setCatalog] = useState(null);
+    const [selected, setSelected] = useState(null);
+    const [loadingError, setLoadingError] = useState("");
 
-    const [hilts, setHilts] = useState([]);
-    const [selectedHilt, setSelectedHilt] = useState(null);
-    const [crystals, setCrystals] = useState([]);
-    const [selectedCrystal, setSelectedCrystal] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [tab, setTab] = useState("parts");
+    const [ignited, setIgnited] = useState(true);
+    const [busy, setBusy] = useState(false);
+
+    const [builds, setBuilds] = useState([]);
+    const [listError, setListError] = useState("");
+    const [currentBuildId, setCurrentBuildId] = useState(null);
+
+    const [formVersion, setFormVersion] = useState(0);
+    const [formInitial, setFormInitial] = useState({
+        name: "",
+        status: "draft",
+    });
+
+    const [notice, setNotice] = useState("");
+    const [actionError, setActionError] = useState("");
 
     useEffect(() => {
         let active = true;
 
-        async function loadCatalog() {
+        async function loadWorkshop() {
             try {
-                const [loadedParts, loadedCrystals] = await Promise.all([
+                const [
+                    hilts,
+                    crystals,
+                    emitters,
+                    accessories,
+                    savedDesigns,
+                ] = await Promise.all([
                     getParts(),
                     getCrystals(),
+                    getEmitters(),
+                    getAccessories(),
+                    listBuilds().catch(() => null),
                 ]);
 
-                const styledHilts = loadedParts.map((part) => {
-                    const matchingStyle = hiltStyles.find(
-                        (style) => style.id === part.id
+                const loadedCatalog = {
+                    hilt: hilts.map((hilt) => ({
+                        ...hilt,
+                        backgroundImage: hiltStyles[hilt.id] ?? "none",
+                    })),
+                    crystal: crystals,
+                    emitter: emitters,
+                    collar: accessories.filter(
+                        (part) => part.categoryId === "collar"
+                    ),
+                    switch: accessories.filter(
+                        (part) => part.categoryId === "switch"
+                    ),
+                    pommel: accessories.filter(
+                        (part) => part.categoryId === "pommel"
+                    ),
+                };
+
+                for (const category of categories) {
+                    if (loadedCatalog[category].length === 0) {
+                        throw new Error(`No ${category} parts are available.`);
+                    }
+                }
+
+                if (!active) return;
+
+                setCatalog(loadedCatalog);
+                setSelected(defaultSelections(loadedCatalog));
+                setBuilds(savedDesigns ?? []);
+
+                if (savedDesigns === null) {
+                    setListError(
+                        "Could not load saved designs. Use Refresh list to retry."
                     );
-
-                    return {
-                        ...part,
-                        backgroundImage: matchingStyle?.backgroundImage ?? "none",
-                    };
-                });
-
-                if (active) {
-                    setHilts(styledHilts);
-                    setSelectedHilt(styledHilts[0] ?? null);
-
-                    setCrystals(loadedCrystals);
-                    setSelectedCrystal(loadedCrystals[0] ?? null);
                 }
             } catch (error) {
-                console.error("Workshop catalog loading failed:", error);
-
                 if (active) {
-                    setError(
-                        `Could not load workshop parts: ${error.message}`
+                    setLoadingError(
+                        `Could not load the workshop: ${error.message}`
                     );
-                }
-            }finally {
-                if (active) {
-                    setLoading(false);
                 }
             }
         }
 
-        loadCatalog();
+        loadWorkshop();
 
         return () => {
             active = false;
         };
     }, []);
 
-    if (loading) {
+    function changePart(category, part) {
+        setSelected((current) => ({
+            ...current,
+            [category]: part,
+        }));
+
+        setNotice("");
+        setActionError("");
+    }
+
+    function resetEditor() {
+        setSelected(defaultSelections(catalog));
+        setCurrentBuildId(null);
+        setFormInitial({ name: "", status: "draft" });
+        setFormVersion((version) => version + 1);
+        setIgnited(true);
+    }
+
+    function startNewBuild() {
+        resetEditor();
+        setTab("parts");
+        setActionError("");
+        setNotice("Fresh workbench ready. Saved designs are unchanged.");
+    }
+
+    async function handleSave(formData) {
+        setBusy(true);
+        setActionError("");
+        setNotice("");
+
+        const payload = {
+            name: formData.name,
+            status: formData.status,
+            hiltId: selected.hilt.id,
+            crystalId: selected.crystal.id,
+            emitterId: formData.emitterId,
+            collarId: selected.collar.id,
+            switchId: selected.switch.id,
+            pommelId: selected.pommel.id,
+        };
+
+        try {
+            const saved = currentBuildId
+                ? await updateBuild(currentBuildId, payload)
+                : await createBuild(payload);
+
+            setCurrentBuildId(saved.id);
+
+            setBuilds((current) => [
+                saved,
+                ...current.filter((build) => build.id !== saved.id),
+            ]);
+
+            return saved;
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function openSavedBuild(id) {
+        setBusy(true);
+        setActionError("");
+        setNotice("");
+
+        try {
+            const build = await getBuild(id);
+            const restored = restoreSelections(build, catalog);
+
+            setSelected(restored);
+            setCurrentBuildId(build.id);
+            setFormInitial({
+                name: build.name,
+                status: build.status,
+            });
+
+            setFormVersion((version) => version + 1);
+            setTab("notes");
+            setNotice("Design opened. Changes are saved with Update build.");
+        } catch (error) {
+            setActionError(`Could not open the design. ${error.message}`);
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function removeSavedBuild(id) {
+        setBusy(true);
+        setActionError("");
+        setNotice("");
+
+        try {
+            await deleteBuild(id);
+
+            setBuilds((current) =>
+                current.filter((build) => build.id !== id)
+            );
+
+            if (currentBuildId === id) {
+                resetEditor();
+            }
+
+            setNotice("Design deleted.");
+            return true;
+        } catch {
+            setActionError("Could not delete the design. Please try again.");
+            return false;
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function refreshSavedBuilds() {
+        setBusy(true);
+
+        try {
+            setBuilds(await listBuilds());
+            setListError("");
+        } catch {
+            setListError("Could not load saved designs. Please try again.");
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    if (loadingError) {
         return (
-            <main className="workshop">
-                <p role="status">Loading workshop parts...</p>
+            <main className="startup">
+                <h1>Outer Rim Workshop</h1>
+                <p role="alert">{loadingError}</p>
+                <p>Check that the backend is running, then refresh.</p>
             </main>
         );
     }
 
-    if (error) {
+    if (!selected) {
         return (
-            <main className="workshop">
-                <p role="alert">{error}</p>
-            </main>
-        );
-    }
-
-    if (!selectedHilt) {
-        return (
-            <main className="workshop">
-                <p>No hilts are available yet.</p>
-            </main>
-        );
-    }
-
-    if (!selectedCrystal) {
-        return (
-            <main className="workshop">
-                <p>No crystals are available yet.</p>
+            <main className="startup">
+                <p role="status">Opening the workshop...</p>
             </main>
         );
     }
 
     const theme = getWorkshopTheme({
-        hilt: selectedHilt,
-        crystal: selectedCrystal,
+        hilt: selected.hilt,
+        crystal: selected.crystal,
     });
+
+    const appearance = getWorkshopAppearance({
+        emitter: selected.emitter,
+        collar: selected.collar,
+        switchPart: selected.switch,
+        pommel: selected.pommel,
+    });
+
+    const accent =
+        theme.glowColor.toLowerCase() === "#000000"
+            ? "#cbd5e1"
+            : theme.glowColor;
 
     return (
         <main
@@ -250,38 +322,161 @@ export default function App() {
                 "--workshop-background": theme.backgroundColor,
                 "--workshop-texture": theme.backgroundImage,
                 "--crystal-glow": theme.glowColor,
+                "--accent": accent,
+                ...appearance,
             }}
         >
-            <header>
-                <p className="eyebrow">INDEPENDENT SABER CRAFT</p>
-                <h1>Outer Rim Workshop</h1>
-                <p>Every component leaves its mark.</p>
+            <header className="workshop-header">
+                <div>
+                    <p className="eyebrow">INDEPENDENT SABER CRAFT</p>
+                    <h1>Outer Rim Workshop</h1>
+                </div>
+
             </header>
 
-            <section className="workbench" aria-label="Current build">
-                <h2>Your workbench</h2>
+            <div className="workshop-layout">
+                <section
+                    className="preview-dock"
+                    aria-label="Current build"
+                >
+                    <div className="bench-heading">
+                        <p className="eyebrow">ASSEMBLY BENCH</p>
+                        <h2>{currentBuildId ? "Your saved design" : "A new beginning"}</h2>
+                        <p className="bench-description">
+                            Every component leaves its mark.
+                        </p>
+                    </div>
 
-                <p aria-live="polite">
-                    {selectedHilt.name} · {selectedCrystal.name}
-                </p>
+                    <SaberPreview
+                        hilt={selected.hilt}
+                        crystal={selected.crystal}
+                        emitter={selected.emitter}
+                        collar={selected.collar}
+                        switchPart={selected.switch}
+                        pommel={selected.pommel}
+                        ignited={ignited}
+                    />
 
-                <div className="crystal" aria-hidden="true" />
-            </section>
+                    <div className="bench-footer">
+                        <p aria-live="polite">
+                            {selected.hilt.name} · {selected.crystal.name}
+                        </p>
+                        <button
+                            type="button"
+                            className="workshop-button"
+                            onClick={startNewBuild}
+                            disabled={busy}
+                        >
+                            New build
+                        </button>
 
-            <PartSelector
-                title="Choose your hilt"
-                parts={hilts}
-                selectedPart={selectedHilt}
-                onSelect={setSelectedHilt}
-            />
+                        <button
+                            type="button"
+                            className="workshop-button"
+                            aria-pressed={ignited}
+                            onClick={() => setIgnited((value) => !value)}
+                        >
+                            {ignited ? "Extinguish blade" : "Ignite blade"}
+                        </button>
+                    </div>
+                </section>
 
-            <PartSelector
-                title="Choose your crystal"
-                parts={crystals}
-                selectedPart={selectedCrystal}
-                onSelect={setSelectedCrystal}
-            />
+                <div className="control-deck" aria-busy={busy}>
+                    <nav
+                        className="workshop-nav"
+                        aria-label="Workshop sections"
+                    >
+                        {[
+                            ["parts", "Parts"],
+                            ["notes", "Builder notes"],
+                            ["saved", "Saved designs"],
+                        ].map(([value, label]) => (
+                            <button
+                                key={value}
+                                type="button"
+                                aria-pressed={tab === value}
+                                disabled={busy}
+                                onClick={() => setTab(value)}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </nav>
 
+                    <div className="workshop-feedback">
+                        {notice && <p role="status">{notice}</p>}
+                        {actionError && <p role="alert">{actionError}</p>}
+                    </div>
+
+                    <fieldset
+                        className="deck-scroll"
+                        disabled={busy}
+                    >
+                        <legend className="visually-hidden">
+                            Workshop controls
+                        </legend>
+
+                        <section hidden={tab !== "parts"}>
+                            <div className="section-heading">
+                                <div>
+                                    <p className="eyebrow">COMPONENT DRAWERS</p>
+                                    <h2>Make it yours</h2>
+                                </div>
+                            </div>
+
+                            {categories.map((category) => (
+                                <PartSelector
+                                    key={category}
+                                    title={drawerTitles[category]}
+                                    parts={catalog[category]}
+                                    selectedPart={selected[category]}
+                                    onSelect={(part) =>
+                                        changePart(category, part)
+                                    }
+                                />
+                            ))}
+                        </section>
+
+                        <section hidden={tab !== "notes"}>
+                            <BuildSummary
+                                hilt={selected.hilt}
+                                crystal={selected.crystal}
+                                emitter={selected.emitter}
+                                collar={selected.collar}
+                                switchPart={selected.switch}
+                                pommel={selected.pommel}
+                            />
+
+                            <BuildForm
+                                key={formVersion}
+                                emitters={catalog.emitter}
+                                // selectedEmitter={selected.emitter}
+                                // onEmitterChange={(part) =>
+                                //     changePart("emitter", part)
+                                // }
+                                onSave={handleSave}
+                                initialName={formInitial.name}
+                                initialStatus={formInitial.status}
+                                submitLabel={
+                                    currentBuildId
+                                        ? "Update build"
+                                        : "Save build"
+                                }
+                            />
+                        </section>
+
+                        <section hidden={tab !== "saved"}>
+                            <SavedBuildList
+                                builds={builds}
+                                error={listError}
+                                onOpen={openSavedBuild}
+                                onDelete={removeSavedBuild}
+                                onRefresh={refreshSavedBuilds}
+                            />
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
         </main>
     );
 }
