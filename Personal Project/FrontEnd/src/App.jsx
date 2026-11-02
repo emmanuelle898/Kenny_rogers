@@ -191,7 +191,7 @@ export default function App() {
             status: formData.status,
             hiltId: selected.hilt.id,
             crystalId: selected.crystal.id,
-            emitterId: formData.emitterId,
+            emitterId: selected.emitter.id,
             collarId: selected.collar.id,
             switchId: selected.switch.id,
             pommelId: selected.pommel.id,

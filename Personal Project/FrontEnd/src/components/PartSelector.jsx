@@ -1,3 +1,5 @@
+import Button from "react-bootstrap/Button";
+
 export default function PartSelector({
                                          title,
                                          parts,
@@ -10,14 +12,15 @@ export default function PartSelector({
 
             <div className="part-options">
                 {parts.map((part) => (
-                    <button
+                    <Button
                         key={part.id}
                         type="button"
+                        variant="outline-light"
                         aria-pressed={selectedPart.id === part.id}
                         onClick={() => onSelect(part)}
                     >
                         {part.name}
-                    </button>
+                    </Button>
                 ))}
             </div>
         </fieldset>

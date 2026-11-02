@@ -3,9 +3,9 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 
 export default function BuildForm({
-                                      emitters,
-                                      selectedEmitter,
-                                      onEmitterChange,
+                                      // emitters,
+                                      // selectedEmitter,
+                                      // onEmitterChange,
                                       onSave,
                                       initialName = "",
                                       initialStatus = "draft",
@@ -22,17 +22,6 @@ export default function BuildForm({
     function clearFeedback() {
         setError("");
         setMessage("");
-    }
-
-    function handleEmitterChange(event) {
-        const emitter = emitters.find(
-            (part) => part.id === event.target.value
-        );
-
-        if (emitter) {
-            onEmitterChange(emitter);
-            clearFeedback();
-        }
     }
 
     async function handleSubmit(event) {
@@ -56,22 +45,24 @@ export default function BuildForm({
             return;
         }
 
-        const emitterExists = emitters.some(
-            (emitter) => emitter.id === selectedEmitter?.id
-        );
-
-        if (!emitterExists) {
-            setError("Choose an available emitter.");
-            return;
-        }
-
         setSaving(true);
+
+        // const emitterExists = emitters.some(
+        //     (emitter) => emitter.id === selectedEmitter?.id
+        // );
+
+        // if (!emitterExists) {
+        //     setError("Choose an available emitter.");
+        //     return;
+        // }
+
+
 
         try {
             await onSave({
                 name: trimmedName,
                 status,
-                emitterId: selectedEmitter.id,
+                // emitterId: selectedEmitter.id,
             });
 
             setMessage("Build saved.");
@@ -143,7 +134,6 @@ export default function BuildForm({
                             }}
                         />
                     </fieldset>
-
 
 
                     <Button type="submit" variant="primary">
