@@ -25,15 +25,12 @@ public record CreateBuildRequest(
         @Size(max = 80)
         String emitterId,
 
-        @NotBlank
         @Size(max = 80)
         String collarId,
 
-        @NotBlank
         @Size(max = 80)
         String switchId,
 
-        @NotBlank
         @Size(max = 80)
         String pommelId
 ) {
