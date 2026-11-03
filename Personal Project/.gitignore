@@ -1,0 +1,10 @@
+# Generated output and machine-specific files, not application source.
+node_modules/
+target/
+dist/
+.DS_Store
+.idea/
+*.iml
+.env
+.env.*
+!.env.example

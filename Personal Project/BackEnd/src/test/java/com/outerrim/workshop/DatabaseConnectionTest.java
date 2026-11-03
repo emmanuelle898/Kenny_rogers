@@ -18,7 +18,7 @@ class DatabaseConnectionTest {
     private DataSource dataSource;
 
     @Test
-    void connectsToWorkshopDatabase() throws Exception {
+    void connectsToTheSeparateTestDatabase() throws Exception {
         // Act
         try (
                 Connection connection = dataSource.getConnection();
@@ -29,8 +29,8 @@ class DatabaseConnectionTest {
         ) {
             // Assert
             assertThat(result.next()).isTrue();
-            assertThat(result.getString(1)).isEqualTo("workshop");
-            assertThat(result.getString(2)).isEqualTo("builder");
+            assertThat(result.getString(1)).isEqualTo("workshop_test");
+            assertThat(result.getString(2)).isEqualTo("workshop_tester");
         }
     }
 }
