@@ -59,7 +59,7 @@ container. If a command fails, the script stops rather than running later steps.
 | Purpose | Compose service | Host port | Database | User | Storage |
 | --- | --- | --- | --- | --- | --- |
 | Application | `db` in `compose.yaml` | 5433 | workshop | builder | persistent volume |
-| Tests | `db-test` in `compose.test.yaml` | 5434 | workshop_test | workshop_tester | temporary filesystem |
+| Tests | `db-test` in `compose.test.yaml` | 15434 | workshop_test | workshop_tester | temporary filesystem |
 
 Main connection settings live in `BackEnd/src/main/resources/application.properties`.
 Test connection settings live in `BackEnd/src/test/resources/application.properties`.
@@ -119,7 +119,7 @@ docker compose -f compose.test.yaml ps -a
 docker compose -f compose.test.yaml logs --tail=60 db-test
 ```
 
-If port 5434 is occupied, identify the process/container using it before stopping
+If port 15434 is occupied, identify the process/container using it before stopping
 anything. Do not redirect tests to port 5433. Password errors can also come from
 overrides such as `SPRING_DATASOURCE_*`, `SPRING_FLYWAY_*`, JVM `-D` properties or
 IDE run settings. Keep these consistent with the test configuration or remove
