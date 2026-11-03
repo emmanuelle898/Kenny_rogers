@@ -1,4 +1,4 @@
-package com.outerrim.workshop;
+package com.outerrim.workshop.emitters;
 
-public record Emitter {
+public record Emitter (String id, String name){
 }

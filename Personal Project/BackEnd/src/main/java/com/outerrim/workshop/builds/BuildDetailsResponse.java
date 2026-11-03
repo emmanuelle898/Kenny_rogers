@@ -1,4 +1,12 @@
 package com.outerrim.workshop.builds;
 
-public class BuildDetailsResponse {
+import java.util.List;
+import java.util.UUID;
+
+public record BuildDetailsResponse(
+        UUID id,
+        String name,
+        String status,
+        List<BuildPartResponse> parts
+) {
 }

@@ -1,106 +1,519 @@
 .workshop {
-    min-height: 100vh;
-    padding: clamp(20px, 5vw, 64px);
-    color: #f4ead7;
-    background-color: var(--workshop-background);
+    --accent: #ba00ff;
+    --panel-radius: 18px;
+    --nav-radius: 12px;
+    --nav-border: solid;
+    --nav-texture: none;
+    --base-border: solid;
+    --control-radius: 999px;
+    --workshop-font: system-ui, sans-serif;
+
+    position: relative;
+    isolation: isolate;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    color: #f4eadb;
+    font-family: var(--workshop-font);
+    background-color: var(--workshop-background, #20252a);
     background-image: var(--workshop-texture, none);
-    );
-    transition: background-color 600ms ease;
 }
 
-.workshop header,
-.workbench,
-.component-drawer {
-    max-width: 1000px;
-    margin: 0 auto 28px;
+.workshop::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+            radial-gradient(ellipse at 15% 12%, transparent, #080d17a8 75%),
+            linear-gradient(90deg, #080d1733, #080d1780);
+}
+
+.workshop-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 26px;
+    border-bottom: 1px solid #e8d6ad35;
+    background: #0a101ccc;
+}
+
+.workshop h1,
+.workshop h2,
+.workshop h3,
+.workshop p {
+    overflow-wrap: anywhere;
+}
+
+.workshop-header h1 {
+    font-size: clamp(1.1rem, 2.2vw, 1.65rem);
+    margin: 0;
+    letter-spacing: 0.025em;
 }
 
 .eyebrow {
-    font-size: 12px;
-    letter-spacing: 3px;
+    margin: 0 0 7px;
+    color: #e8cf9c;
+    font-size: 1rem;
+    /*font-weight: 700;*/
+    /*letter-spacing: 0.2em;*/
 }
 
-.workshop h1 {
-    font-family: Georgia, serif;
-    font-size: clamp(30px, 5vw, 52px);
-    font-weight: normal;
+.workshop-layout {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);
+    gap: 20px;
+    padding: 20px;
 }
 
-.workbench {
-    padding: 32px;
-    border-radius: 45px 12px 35px 12px;
-    background: #101410b3;
-    box-shadow:
-            inset 0 0 35px #00000080,
-            0 0 24px var(--crystal-glow);
-    transition: box-shadow 600ms ease;
+.preview-dock {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: clamp(14px, 3vw, 38px);
+    border: 1px solid #f1dba635;
+    border-bottom: 6px var(--base-border) #ba9e6c;
+    border-radius: var(--panel-radius);
+        background:
+                radial-gradient(ellipse at 55% 50%, #ffffff08, transparent 62%),
+                repeating-linear-gradient(0deg, #ffffff03 0px 1px, transparent 1px 24px),
+                #0c131cdd;
+    box-shadow: inset 0 0 70px #0007, 0 20px 50px #0005;
 }
 
-.crystal {
-    width: 45px;
-    height: 90px;
-    margin: 32px auto;
-    background: var(--crystal-glow);
-    clip-path: polygon(50% 0, 90% 30%, 70% 85%, 40% 100%, 10% 35%);
-    transition: background-color 600ms ease;
+.preview-dock::before {
+    content: "";
+    position: absolute;
+    width: 62%;
+    aspect-ratio: 1;
+    max-height: 75%;
+    border: 1px solid #ffffff0c;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.bench-heading,
+.bench-footer {
+    position: relative;
+    z-index: 1;
+}
+
+.bench-heading h2 {
+    font-size: clamp(1.5rem, 3.0vw, 2.5rem);
+}
+
+.bench-description,
+.bench-footer p {
+    color: #c5c2bb;
+    font-size: 0.85rem;
+}
+
+.bench-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.bench-footer p {
+    margin: 0;
+}
+
+.control-deck {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding: 12px;
+    border: 1px solid #d5bd8845;
+    border-radius: var(--panel-radius);
+    background: #101720eb;
+    box-shadow: 0 15px 40px #0005;
+}
+
+.workshop-nav {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 6px;
+    border: 4px var(--nav-border) #bba16e;
+    border-radius: var(--nav-radius);
+    background-color: #161b23;
+    background-image: var(--nav-texture);
+}
+
+.workshop-nav button {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 6px;
+    border: 1px solid transparent;
+    border-radius: var(--control-radius);
+    background: transparent;
+    color: #d5d1c7;
+    font: inherit;
+    font-size: 0.84rem;
+}
+
+.workshop-nav button[aria-pressed="true"] {
+    color: #fff;
+    border-color: var(--accent);
+    background: #ffffff10;
+    box-shadow: inset 0 -2px var(--accent);
+}
+
+.workshop-feedback {
+    flex-shrink: 0;
+}
+
+.workshop-feedback p {
+    margin: 10px 4px;
+    font-size: 0.85rem;
+}
+
+.deck-scroll {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #aa9169 #131921;
+    border: 0;
+    margin: 0;
+    padding: 18px 8px 24px;
+}
+
+.workshop [hidden] {
+    display: none !important;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: 1.5rem;
 }
 
 .component-drawer {
+    position: relative;
     min-width: 0;
-    padding: 20px;
-    border: 1px solid #c1aa7b;
-    border-radius: 8px 8px 28px 28px;
-    background: #17140f66;
+    margin: 0 0 20px;
+    padding: 18px;
+    border: 1px solid #e4c68d45;
+    border-bottom: 5px var(--base-border) #846b48;
+    border-radius: var(--panel-radius);
+    background:
+            linear-gradient(120deg, #ffffff07, transparent 45%),
+            #1b222c;
+    box-shadow: inset 0 2px #ffffff08, 0 8px 14px #0004;
+}
+
+.component-drawer::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    width: 22px;
+    height: 20px;
+    background: linear-gradient(#e0c48b, #685332);
+    clip-path: var(--emitter-crest);
+    pointer-events: none;
 }
 
 .component-drawer legend {
-    padding: 0 10px;
-    font-family: Georgia, serif;
-    font-size: 20px;
+    float: none;
+    width: auto;
+    padding: 0 30px 0 5px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #f5dfb1;
 }
 
 .part-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+    gap: 10px;
 }
 
 .part-options button {
-    min-height: 48px;
-    padding: 12px 20px;
-    color: #f4ead7;
-    background: #25251f;
-    border: 1px solid #918674;
-    border-radius: 8px;
-    cursor: pointer;
+    min-height: 62px;
+    padding: 12px;
+    color: #e7e0d5;
+    background:
+            linear-gradient(#ffffff08, #00000020),
+            #10161e;
+    border: 1px solid #b2a08055;
+    border-radius: var(--control-radius);
+    box-shadow: 0 4px 0 #06090d;
+    font: inherit;
+    text-align: left;
+    transition: transform 120ms ease, border-color 120ms ease;
+}
+
+.part-options button:hover {
+    color: #fff;
+    border-color: var(--accent);
+    transform: translateY(-2px);
 }
 
 .part-options button[aria-pressed="true"] {
-    border-color: var(--crystal-glow);
-    box-shadow: inset 0 -3px var(--crystal-glow);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow:
+            0 2px 0 #06090d,
+            inset 4px 0 var(--accent);
+    transform: translateY(2px);
+    background-color: #2b3038;
 }
 
-.part-options button:focus-visible {
-    outline: 3px solid #fff0cd;
-    outline-offset: 4px;
+.workshop-button,
+.workshop .btn {
+    font: inherit;
+    border-radius: var(--control-radius);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .workshop,
-    .workbench,
-    .crystal {
-        transition: none;
+.workshop-button {
+    padding: 9px 14px;
+    color: #f8ead1;
+    border: 1px solid #ccb07980;
+    background: #17202d;
+}
+
+.workshop button:focus-visible,
+.workshop input:focus-visible,
+.workshop select:focus-visible {
+    outline: 3px solid #f6dfac;
+    outline-offset: 3px;
+}
+
+.workshop button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.build-notebook {
+    color: #2d241b;
+    background:
+            repeating-linear-gradient(
+                    transparent 0px 31px, #69462318 31px 32px
+            ),
+            linear-gradient(110deg, #e5d2ad, #cbb68f);
+    border: 1px solid #66502d;
+    border-left: 12px solid #6b4c30;
+    border-bottom: 6px var(--base-border) #694c2f;
+    border-radius: var(--panel-radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 24px #0005;
+}
+
+.build-notebook .eyebrow {
+    color: #614827;
+}
+
+.build-notebook h2 {
+    font-size: 1.3rem;
+}
+
+.build-notebook dl {
+    margin: 18px 0 0;
+}
+
+.build-notebook dl > div {
+    display: grid;
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid #5b412427;
+}
+
+.build-notebook dd {
+    margin: 0;
+}
+
+.build-form,
+.saved-card {
+    padding: 20px;
+    border: 1px solid #cfb27450;
+    border-radius: var(--panel-radius);
+    background: #171f2a;
+}
+
+.build-form h2 {
+    font-size: 1.3rem;
+    margin-bottom: 18px;
+}
+
+.workshop .form-control,
+.workshop .form-select {
+    font-family: inherit;
+    color: #f6eedf;
+    background-color: #0f1620;
+    border-color: #a68d6266;
+}
+
+.workshop .form-control:focus,
+.workshop .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px #ffffff12;
+}
+
+.workshop .form-check-input:checked {
+    background-color: #856a3e;
+    border-color: #dec28a;
+}
+
+.saved-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
+    display: grid;
+    gap: 16px;
+}
+
+.saved-card h3 {
+    font-size: 1.1rem;
+    margin: 0 0 8px;
+}
+
+.build-status {
+    color: #d6ba83;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+}
+
+.saved-actions,
+.delete-confirmation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.delete-confirmation {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #a35e55;
+}
+
+.delete-confirmation p {
+    width: 100%;
+    margin: 0;
+}
+
+.workshop [role="alert"] {
+    color: #ffd0c9;
+}
+
+.startup {
+    min-height: 100vh;
+    padding: 40px;
+    background: #111924;
+    color: #f2e8d5;
+}
+
+@media (max-width: 760px) {
+    .workshop-header {
+        padding: 10px 14px;
+    }
+
+    .workshop-header .eyebrow {
+        display: none;
+    }
+
+    .workshop-layout {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(135px, 27dvh) minmax(0, 1fr);
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .preview-dock {
+        padding: 10px 14px;
+        justify-content: center;
+    }
+
+    .bench-heading,
+    .bench-footer p {
+        display: none;
+    }
+
+    .preview-dock .saber-preview {
+        flex: 1;
+        min-height: 0;
+        padding: 8px 4px;
+    }
+
+    .bench-footer {
+        justify-content: flex-end;
+    }
+
+    .bench-footer button {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+
+    .control-deck {
+        padding: 8px;
+    }
+
+    .workshop-nav button {
+        font-size: 0.75rem;
+        padding: 10px 3px;
+    }
+
+    .deck-scroll {
+        padding: 12px 4px 20px;
+    }
+
+    .component-drawer {
+        padding: 14px;
+    }
+
+    .part-options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-.workshop > header {
-    padding: 24px;
-    border-radius: 12px;
-    background: #151813e6;
+@media (max-height: 560px) and (min-width: 761px) {
+    .bench-description,
+    .bench-heading .eyebrow {
+        display: none;
+    }
+
+    .preview-dock {
+        padding: 16px;
+    }
+
+    .workshop-header {
+        padding-block: 8px;
+    }
 }
 
-.component-drawer legend {
-    padding: 6px 12px;
-    border-radius: 6px;
-    background: #151813;
+@media (prefers-reduced-motion: reduce) {
+    .workshop *,
+    .workshop *::before,
+    .workshop *::after {
+        transition: none !important;
+        animation: none !important;
+    }
 }

@@ -24,25 +24,36 @@ test("changing the hilt changes the background but keeps the crystal glow", () =
     expect(secondTheme.glowColor).toBe("#ba00ff");
 })
 
-test("changing the crystal glow changes the crystal glow but it changes the hilt", () =>{
-    //arrange
-    const greenHilt = {backgroundColor: "#273c2b"};
-    const brassHilt = {backgroundColor: "#C49E5B"};
-    const violetCrystal = {glowColor: "#ba00ff"};
-    //act
+test("changing the crystal changes the glow but keeps the hilt", () => {
+    // Arrange
+    const hilt = {
+        backgroundColor: "#273c2b",
+        backgroundImage: "linear-gradient(#142019, #8b9f86)",
+    };
+
+    const violet = { glowColor: "#ba00ff" };
+    const green = { glowColor: "#33ff33" };
+
+    // Act
     const firstTheme = getWorkshopTheme({
-        hilt: greenHilt,
-        crystal: violetCrystal,
+        hilt,
+        crystal: violet,
     });
 
     const secondTheme = getWorkshopTheme({
-        hilt: brassHilt,
-        crystal: violetCrystal,
+        hilt,
+        crystal: green,
     });
-    //assert
-    expect(firstTheme.backgroundColor).toBe("#273c2b");
-    expect(secondTheme.backgroundColor).toBe("#C49E5B");
 
+    // Assert
     expect(firstTheme.glowColor).toBe("#ba00ff");
-    expect(secondTheme.glowColor).toBe("#ba00ff");
-})
+    expect(secondTheme.glowColor).toBe("#33ff33");
+
+    expect(secondTheme.backgroundColor).toBe(
+        firstTheme.backgroundColor
+    );
+
+    expect(secondTheme.backgroundImage).toBe(
+        firstTheme.backgroundImage
+    );
+});

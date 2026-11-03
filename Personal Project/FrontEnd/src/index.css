@@ -2,12 +2,23 @@
     box-sizing: border-box;
 }
 
-body {
+html,
+body,
+#root {
     margin: 0;
-    min-width: 320px;
-    font-family: Arial, sans-serif;
+    width: 100%;
+    min-height: 100%;
 }
 
-button {
+body {
+    min-width: 320px;
+    background: #111924;
+}
+
+button,
+input,
+select {
     font: inherit;
 }
+
+

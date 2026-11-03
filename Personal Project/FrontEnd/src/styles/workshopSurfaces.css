@@ -1,0 +1,220 @@
+/* The room stays consistent while the workshop surfaces change. */
+.workshop {
+    color: #f4efe5;
+    background-color: #080d13;
+    background-image:
+            radial-gradient(
+                    ellipse at 50% 0%,
+                    #27394b66,
+                    transparent 70%
+            ),
+            radial-gradient(
+                    circle at 25% 20%,
+                    #ffffff55 0 1px,
+                    transparent 1.5px
+            );
+    background-size: auto, 180px 140px;
+}
+
+.workshop::before {
+    background: linear-gradient(
+            180deg,
+            #00000011,
+            #00000066
+    );
+}
+
+/* Selected hilt material becomes the surface of these boxes. */
+.component-drawer,
+.preview-dock,
+.build-form,
+.saved-card {
+    background-color: var(--workshop-background, #273c2b);
+
+    background-image:
+            linear-gradient(
+                    120deg,
+                    #05090f55,
+                    #05090faa
+            ),
+            var(--workshop-texture, none);
+
+    border-radius: var(--panel-radius, 18px);
+    border-top: 2px solid #ffffff55;
+    border-right: 2px solid #00000088;
+    border-bottom: 7px var(--base-border, solid) #020407;
+    border-left: 2px solid #ffffff33;
+
+    box-shadow:
+            inset 0 2px 0 #ffffff33,
+            inset 0 -5px 12px #00000077,
+            0 12px 24px #00000077;
+
+    transition:
+            border-radius 220ms ease,
+            border-color 220ms ease,
+            box-shadow 220ms ease;
+}
+
+/* Crystal illumination around the assembly bench. */
+.preview-dock {
+    box-shadow:
+            inset 0 0 28px #00000088,
+            0 0 0 2px var(--accent, #ba00ff),
+            0 0 22px -8px var(--accent, #ba00ff),
+            0 16px 30px #00000088;
+}
+
+/* Keep the surrounding control frame quiet. */
+.control-deck {
+    background: #081018ee;
+}
+
+/* Readable labels mounted on the material surfaces. */
+.component-drawer legend,
+.build-form h2,
+.saved-card h3 {
+    width: fit-content;
+    max-width: 100%;
+    padding: 7px 12px;
+
+    color: #fff6df;
+    background: #05090fe6;
+    border: 1px solid #ffffff33;
+    border-radius: 6px;
+
+    text-shadow: 0 2px 3px #000000;
+}
+
+.component-drawer legend {
+    max-width: calc(100% - 54px);
+}
+
+/* A larger emblem makes the emitter silhouette more noticeable. */
+.component-drawer::after {
+    width: 42px;
+    height: 38px;
+    top: 14px;
+    right: 12px;
+
+    background: linear-gradient(
+            135deg,
+            #fff6db,
+            var(--accent, #ba00ff)
+    );
+
+    clip-path: var(--emitter-crest);
+    pointer-events: none;
+}
+
+/* Ring selection controls the navigation's construction. */
+.workshop-nav {
+    border-width: 6px;
+    border-style: var(--nav-border, solid);
+    border-color: #c7ad76;
+
+    border-radius: var(--nav-radius, 12px);
+    background-color: #101820;
+    background-image: var(--nav-texture, none);
+
+    box-shadow:
+            inset 0 0 16px #000000aa,
+            0 4px 10px #00000077;
+}
+
+.workshop-nav button[aria-pressed="true"] {
+    color: #fff;
+    background-color: #263340;
+    border-color: var(--accent, #ba00ff);
+
+    box-shadow:
+            inset 0 -4px 0 var(--accent, #ba00ff);
+}
+
+/* Switch selection changes typography and control shapes. */
+.workshop button,
+.workshop input,
+.workshop select,
+.workshop textarea {
+    font-family: var(
+            --workshop-font,
+            system-ui,
+            sans-serif
+    );
+}
+
+.part-options button {
+    position: relative;
+    min-height: 72px;
+    padding: 14px 30px 14px 12px;
+
+    color: #f7f0df;
+    background: #071015d9;
+    border: 2px solid #ffffff33;
+    border-radius: var(--control-radius, 12px);
+
+    box-shadow:
+            inset 0 1px 0 #ffffff22,
+            0 5px 0 #00000088;
+
+    transition:
+            transform 140ms ease,
+            box-shadow 140ms ease,
+            border-color 140ms ease,
+            border-radius 220ms ease;
+}
+
+.part-options button:enabled:hover {
+    color: #fff;
+    background: #17232ee6;
+    border-color: var(--accent, #ba00ff);
+    transform: translateY(-2px);
+}
+
+/* Pressed state remains obvious even with a dark crystal. */
+.part-options button[aria-pressed="true"] {
+    color: #fff;
+    background: #07101599;
+    border-color: var(--accent, #ba00ff);
+
+    transform: translateY(3px);
+
+    box-shadow:
+            inset 0 0 0 2px var(--accent, #ba00ff),
+            inset 0 4px 14px #00000099,
+            0 0 15px -5px var(--accent, #ba00ff);
+}
+
+.part-options button[aria-pressed="true"]::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    right: 9px;
+
+    color: #fff;
+    font-weight: 700;
+}
+
+/* Preserve the notebook paper; change its binding and shape. */
+.build-notebook {
+    border-left-color: var(
+            --workshop-background,
+            #6c4223
+    );
+    border-radius: var(--panel-radius, 18px);
+}
+
+.workshop button:focus-visible {
+    outline: 3px solid #fff1b8;
+    outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-drawer,
+    .preview-dock,
+    .build-form,
+    .saved-card,
+    .part-options button {
+        transition: none;
+    }
+}
