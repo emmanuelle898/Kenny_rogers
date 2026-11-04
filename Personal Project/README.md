@@ -3,7 +3,8 @@ which stores catalog parts and saved builds in a PostgreSQL database managed by 
 
 
 
-
+Run the following commands from Personal Project folder unless stated otherwise.
+See troubleshooting below if there are any issues.
 
 Make sure you have the following installed on your machine before starting:
 
@@ -28,7 +29,7 @@ you will run './mvnw' (Mac/Linux)or 'mvnw.cmd' (Windows).
     Windows: 'choco install maven'
 
 
-Run the following commands from Personal Project or root unless stated otherwise.
+To start docker:
 
 'docker compose -f compose.yaml up -d --wait db'
 
@@ -44,6 +45,8 @@ In another terminal:
 'npm run dev'
 
 Open the local URL Vite prints.
+
+Open a 3rd terminal to do CL inputs and tests.
 
 
 
