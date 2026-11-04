@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { beforeEach, afterEach, expect, test, vi } from "vitest";
+import  { beforeEach, afterEach, expect, test, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -144,7 +144,7 @@ test("part buttons change the saber and workshop appearance", async () => {
     expect(preview.closest(".preview-dock")).not.toBeNull();
 });
 
-test("creates a design with all six selections", async () => {
+test("creates a design with all five selections", async () => {
     const user = userEvent.setup();
     await openWorkshop();
 

@@ -517,3 +517,19 @@
         animation: none !important;
     }
 }
+
+.build-affiliation {
+    position: relative;
+    z-index: 1;
+    margin-top: 16px;
+}
+
+.build-affiliation label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.build-affiliation select {
+    width: 100%;
+}

@@ -24,6 +24,7 @@ import { getWorkshopAppearance } from "./utils/getWorkshopAppearance.js";
 import { hiltStyles } from "./styles/hiltStyles.js";
 import "./App.css";
 import "./styles/workshopSurfaces.css";
+import dropdown from "bootstrap/js/src/dropdown.js";
 
 const categories = ["hilt", "crystal", "emitter", "collar", "switch", "pommel"];
 
@@ -72,6 +73,7 @@ export default function App() {
     const [tab, setTab] = useState("parts");
     const [ignited, setIgnited] = useState(true);
     const [busy, setBusy] = useState(false);
+    const [affiliation, setAffiliation] = useState("");
 
     const [builds, setBuilds] = useState([]);
     const [listError, setListError] = useState("");
@@ -328,8 +330,8 @@ export default function App() {
         >
             <header className="workshop-header">
                 <div>
-                    <p className="eyebrow">INDEPENDENT SABER CRAFT</p>
-                    <h1>Outer Rim Workshop</h1>
+                    <h1 className="eyebrow">Outer Rim Workshop</h1>
+
                 </div>
 
             </header>
@@ -341,9 +343,9 @@ export default function App() {
                 >
                     <div className="bench-heading">
                         <p className="eyebrow">ASSEMBLY BENCH</p>
-                        <h2>{currentBuildId ? "Your saved design" : "A new beginning"}</h2>
+                        <h2>{currentBuildId ? "Your saved design" : "Let the Force Guide your build..."}</h2>
                         <p className="bench-description">
-                            Every component leaves its mark.
+                            Choose wisely..."Do or Do not, there is no try"
                         </p>
                     </div>
 
@@ -379,6 +381,30 @@ export default function App() {
                             {ignited ? "Extinguish blade" : "Ignite blade"}
                         </button>
                     </div>
+
+                    <div className="build-affiliation">
+                        <label htmlFor="build-affiliation">
+                            Who are you building the saber for?
+                        </label>
+
+                        <select
+                            id="build-affiliation"
+                            name="affiliation"
+                            className="form-select"
+                            value={selected.affiliation}
+                            onChange={(event) => setAffiliation(event.target.value)}
+                            disabled={busy}
+                        >
+                            <option value=""></option>
+                            <option value="jedi">Jedi</option>
+                            <option value="sith">Sith</option>
+                            <option value="empire">Empire</option>
+                            <option value="republic">Republic</option>
+                            <option value="bounty-hunter">Bounty Hunter</option>
+                        </select>
+                    </div>
+
+
                 </section>
 
                 <div className="control-deck" aria-busy={busy}>
@@ -420,7 +446,7 @@ export default function App() {
                             <div className="section-heading">
                                 <div>
                                     <p className="eyebrow">COMPONENT DRAWERS</p>
-                                    <h2>Make it yours</h2>
+
                                 </div>
                             </div>
 
